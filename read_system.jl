@@ -1,10 +1,10 @@
 include("check_semicolon.jl")
 """
-    read_system(filename::String)
+    read_system(filename::String, verbose::Bool=false)
 
 Input: The name of a file with polynomials in PHCpack format.
 
-Output: A string array of polynomials.
+Output: The number of polynomials and a string array of polynomials.
 
 Example:
 
@@ -12,7 +12,7 @@ Example:
     # to make the file example.txt.
     dim, pols = read_system(\"example.txt\")
 """
-function read_system(filename)
+function read_system(filename::String, verbose::Bool=false)
     count = 0;
     polyCount = 0;
     polynomial = [""]
@@ -56,9 +56,11 @@ function read_system(filename)
     end
     
     polynomial = setdiff(polynomial, [""])
-    print(neq)
-    print(" polynomials in the given system")
-    println("")
-    println(polynomial)
+    if verbose
+        print(neq)
+        print(" polynomials in the given system")
+        println("")
+        println(polynomial)
+    end
     return nvar, polynomial
 end

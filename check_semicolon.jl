@@ -1,12 +1,12 @@
 """
-    check_semicolon(s::String)
+    check_semicolon(s::SubString{String})
 
 Returns the number of semicolons in a string s.
 """
-function check_semicolon(s::String)
+function check_semicolon(s::SubString{String})
     ncolon = 0
     for i = 1:length(s)
-        if string[i] == ';'
+        if s[i] == ';'
             ncolon = ncolon + 1
         end
     end
