@@ -33,11 +33,12 @@ Example:
 """
 function extract_sols(char_sols)
     sol_list = split(char_sols ,r"[[]")
-    println(length(sol_list))
+    # println(sol_list)
+    # println(length(sol_list))
     deleteat!(sol_list, 1)
     deleteat!(sol_list, 1)
     dict_list = []
-    println(length(sol_list))
+    # println(length(sol_list))
     for i in 1:length(sol_list)
         dict = Dict()
         attr_list = split(sol_list[i],r"[,]")
