@@ -33,6 +33,8 @@ Example:
 """
 function extract_sols(char_sols)
     sol_list = split(char_sols ,r"[[]")
+    println(length(sol_list))
+    deleteat!(sol_list, 1)
     deleteat!(sol_list, 1)
     dict_list = []
     println(length(sol_list))
@@ -54,10 +56,10 @@ function extract_sols(char_sols)
                 push!(dict, indiv_list[1] => cpx_result)
             end
         end
-        if i > 1
-            sort(collect(dict), by=x->x[1])
-            push!(dict_list, dict)
-        end
+        #if i > 1
+        sort(collect(dict), by=x->x[1])
+        push!(dict_list, dict)
+        #end
     end
     return dict_list
 end
