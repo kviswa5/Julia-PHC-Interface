@@ -35,7 +35,7 @@ function extract_sols(char_sols)
     sol_list = split(char_sols ,r"[[]")
     deleteat!(sol_list, 1)
     dict_list = []
-    print(length(sol_list))
+    println(length(sol_list))
     for i in 1:length(sol_list)
         dict = Dict()
         attr_list = split(sol_list[i],r"[,]")
@@ -54,8 +54,10 @@ function extract_sols(char_sols)
                 push!(dict, indiv_list[1] => cpx_result)
             end
         end
-    sort(collect(dict), by=x->x[1])
-    push!(dict_list, dict)
+        if i > 1
+            sort(collect(dict), by=x->x[1])
+            push!(dict_list, dict)
+        end
     end
     return dict_list
 end
