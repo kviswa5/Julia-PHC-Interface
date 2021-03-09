@@ -16,7 +16,16 @@ function test()
     for i=1:size(q, 1)
         println(q[i])
     end
-    sols = runphc.solve_system(p)
+    sols, startsys, startsols = runphc.solve_system(p)
+    println("The start system :")
+    for i=1:size(startsys, 1)
+        println(startsys[i])
+    end
+    println("The start solutions :")
+    for i=1:size(sols, 1)
+        println("Start solution ", i, " :")
+        println(startsols[i])
+    end
     println("The solutions :")
     for i=1:size(sols, 1)
         println("Solution ", i, " :")

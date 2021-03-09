@@ -8,7 +8,10 @@ using Random
                  verbose::Bool=true)
 
 Takes on input a list of string representations of polynomials
-and returns the solutions computed by the blackbox solver.
+and returns the solutions computed by the blackbox solver,
+as first argument on return.  Additionally, the polynomials in
+the start system and the start solutions are returned,
+respectively as the second and the third argument in the return tuple.
 
 The other input arguments are
 
@@ -55,6 +58,34 @@ function solve_system(pols::Array{String,1},
     end
     close(solf_id)
     solutions = extract_sols(sols)
-    
-    return solutions
+
+    startfile = tmpdir * "/start" * sr
+    if verbose
+         println("Extracting start system and solutions from $outfile ...")
+    end
+    cmd_q = `$phcbin -z -p $outfile $startfile`
+    run(cmd_q)
+
+    if verbose
+        println("Reading start system from $startfile ...")
+    end
+    dim, startpols = read_system(startfile, verbose)
+
+    startsolfile = tmpdir * "/tmp" * sr
+    if verbose
+         println("Extracting start solutions from $startfile ...")
+    end
+    cmd_qz = `$phcbin -z $startfile $startsolfile`
+    run(cmd_qz)
+
+    startsolf_id = open(startsolfile, "r")
+    startsols = String(read(startsolf_id))
+    if verbose
+        println("The start solutions :")
+        print(startsols)
+    end
+    close(startsolf_id)
+    startsolutions = extract_sols(startsols)
+
+    return solutions, startpols, startsolutions
 end
