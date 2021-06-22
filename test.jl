@@ -18,7 +18,7 @@ function test()
     for i=1:size(q, 1)
         println(q[i])
     end
-    sols, startsys, startsols = solve_system(p)
+    sols, startsys, startsols = solve_system(p,startsys=true)
     println("The start system :")
     for i=1:size(startsys, 1)
         println(startsys[i])
