@@ -4,6 +4,8 @@
 Runs a simple test on the solve_system ...
 """
 function test()
+    version = version_string(verbose=false)
+    println("Running $version")
     p = ["x^3 + 2*x*y - 1;", "x + y - 1;"];
     name = "example.txt"
     write_system(name, p)
