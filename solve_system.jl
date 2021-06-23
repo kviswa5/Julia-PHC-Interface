@@ -6,6 +6,7 @@ using Random
                  phcbin::String="phc",
                  tmpdir::String="/tmp",
                  startsys::Bool=false,
+                 debug::Bool=false,
                  verbose::Bool=true)
 
 Takes on input a list of string representations of polynomials
@@ -24,12 +25,15 @@ The four other optional input arguments are
 
     startsys is the flag to indicate the return of the start system
 
+    if debug is true, then temporary files are not removed
+
     verbose is the verbose flag
 """
 function solve_system(pols::Array{String,1};
                       phcbin::String="phc",
                       tmpdir::String="/tmp",
                       startsys::Bool=false,
+                      debug::Bool=false,
                       verbose::Bool=true)
     moment = Dates.now()          # use time to generate random string
     seed = Dates.value(moment)
@@ -66,6 +70,16 @@ function solve_system(pols::Array{String,1};
     solutions = extract_sols(sols)
 
     if !startsys
+        if !debug
+            if verbose
+                println("Removing $infile ...")
+                rm(infile)
+                println("Removing $outfile ...")
+                rm(outfile)
+                println("Removing $solfile ...")
+                rm(solfile)
+            end
+        end
         return solutions
     else
         startfile = tmpdir * "/start" * sr
@@ -92,6 +106,20 @@ function solve_system(pols::Array{String,1};
         end
         close(startsolf_id)
         startsolutions = extract_sols(startsols)
+
+        if !debug
+            if verbose
+                println("Removing $infile ...")
+                rm(infile)
+                println("Removing $outfile ...")
+                rm(outfile)
+                println("Removing $solfile ...")
+                rm(solfile)
+                println("Removing $startfile ...")
+                rm(startfile)
+            end
+        end
+
         return solutions, startpols, startsolutions
     end
 end
