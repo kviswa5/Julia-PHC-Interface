@@ -6,6 +6,7 @@ using Random
                  phcbin::String="phc",
                  tmpdir::String="/tmp",
                  startsys::Bool=false,
+                 nthreads=0,
                  debug::Bool=false,
                  verbose::Bool=true)
 
@@ -33,6 +34,7 @@ function solve_system(pols::Array{String,1};
                       phcbin::String="phc",
                       tmpdir::String="/tmp",
                       startsys::Bool=false,
+                      nthreads=0,
                       debug::Bool=false,
                       verbose::Bool=true)
     moment = Dates.now()          # use time to generate random string
@@ -50,7 +52,17 @@ function solve_system(pols::Array{String,1};
     if verbose
          println("Writing output to $outfile ...")
     end
-    cmd_b = `$phcbin -b $infile $outfile`
+    if nthreads == 0
+        cmd_b = `$phcbin -b $infile $outfile`
+    elseif nthreads == Inf
+        cmd_b = `$phcbin -b -t $infile $outfile`
+    else
+        argnt = Int(nthreads) 
+        cmd_b = `$phcbin -b -t$argnt $infile $outfile`
+    end
+    if verbose
+        println("Running ", cmd_b)
+    end
     run(cmd_b)
 
     solfile = tmpdir * "/sol" * sr

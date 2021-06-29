@@ -11,7 +11,7 @@ To run the test in a Julia sesion, type
 """
 module juliaPHC
 
-export version_string, read_system, write_system, solve_system, extract_sols, test
+export version_string, read_system, write_system, solve_system, extract_sols, test, testcyclic7
 
 include("version_string.jl")
 include("read_system.jl")
@@ -19,5 +19,6 @@ include("write_system.jl")
 include("solve_system.jl")
 include("extract_sols.jl")
 include("test.jl")
+include("testcyclic7.jl")
 
 end
