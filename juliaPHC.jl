@@ -3,7 +3,7 @@ The module juliaPHC is a collection of functions to prepare the input
 and process the output of the executable phc of the software PHCpack.
 
 Exports `version_string`, `read_system`, `write_system`, `solve_system`,
-`extract_sols`, and `test`.
+`extract_sols`, `test`, and `testcyclic7`.
 
 To run the test in a Julia sesion, type
 

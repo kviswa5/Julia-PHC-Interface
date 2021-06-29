@@ -16,15 +16,18 @@ as first argument on return.
 
 Optionally, the polynomials in the start system and the start solutions
 may be returned, respectively as the second and the third argument 
-in the return tuple.
+in the return tuple, if the option startsys is set to true.
 
-The four other optional input arguments are
+The other optional input arguments are
 
     phcbin is the location of the binary phc
 
     tmpdir is the folder for temporary files
 
     startsys is the flag to indicate the return of the start system
+
+    nthreads is the number of threads (by default no multithreading if zero),
+    nthreads=Inf applies all available threads
 
     if debug is true, then temporary files are not removed
 
