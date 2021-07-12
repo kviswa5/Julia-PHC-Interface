@@ -1,12 +1,13 @@
 using Dates
 using Random
-using Pipe: @pipe
+# Pipe is not used!
+# using Pipe: @pipe
 """
 If stable = true, return both stable/common
 """
 function mixed_volume(pols::Array{String,1};
                       phcbin::String="phc",
-                      tmpdir::String="/Users/kv/Desktop/tmp",
+                      tmpdir::String="/tmp",
                       startsys::Bool=true,
                       stable::Bool=false,
                       debug::Bool=false,
@@ -83,10 +84,10 @@ function mixed_volume(pols::Array{String,1};
         mixed_vol = parse(Int64,sols[volend+4+length("common mixed volume"):volend+4+length("stable mixed volume")+end_index])
     end
     
-    
-    print(mixed_vol)
-    
     close(solf_id)
-    solutions = extract_sols(sols)
-   
+    if startsys
+        solutions = extract_sols(sols)
+    end
+
+    return mixed_vol
 end
