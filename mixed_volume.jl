@@ -1,7 +1,6 @@
 using Dates
 using Random
-# Pipe is not used!
-# using Pipe: @pipe
+
 """
 If stable = true, return both stable/common
 """
@@ -18,14 +17,12 @@ function mixed_volume(pols::Array{String,1};
     rng = MersenneTwister(seed)
     sr = string(abs(round(rand(rng, Int64)))) 
     
-    
     infile = tmpdir * "/" * "mixedvolsysfile" * sr
     outfile = tmpdir * "/" *  "mixedvolout" * sr
     solsfile = tmpdir * "/" * "mixedsols" * sr
     startfile = tmpdir * "/" * "mixedstart" * sr
     temp = tmpdir * "/" * "mixedvoltemp" * sr
-    #phcout = tmpdir * "/" * "mixedvolphcout" * sr
-    session = tmpdir * "/" * "output" * sr
+    session = tmpdir * "/" * "session" * sr
     
     write_system(infile, pols)
     
@@ -48,8 +45,6 @@ function mixed_volume(pols::Array{String,1};
     temp_id = open(temp, "w")
     println(temp_id,tempstr)
     close(temp_id)
-    # Call phc
-    #@pipe `$phcbin -m $temp $phcout` |> run(_)
     
     run(pipeline(`cat $temp`,pipeline(`$phcbin -m`,stdout = "$session")))
     
@@ -57,31 +52,35 @@ function mixed_volume(pols::Array{String,1};
     sols = String(read(solf_id))
     close(solf_id)
     
-    # Find the stable mixed volume
-    if stable
-        mixedvol_str = "stable mixed volume"
-    else
-        mixedvol_str = "common mixed volume"
-    end
+    # Find the mixed volume
+    mixedvol_str = "common mixed volume"
+    lenvolstr = length(mixedvol_str)
     volstart = findall(mixedvol_str,sols)
-    #print(volstart[1][1])
     volend = volstart[1][1]-1
-    #print(sols)
     
+    timing_str = "TIMING INFORMATION for Volume"
+    vollast = findall(timing_str,sols)
+    end_val = vollast[1][1]-length(timing_str)+2
+    vollast = vollast[1][1]
+    end_index = findall("\n",sols[volend+4+lenvolstr:vollast-1])
+    end_index = end_index[1][1]
+    solpos1 = volend+4+lenvolstr
+    solpos2 = volend+2+length("stable mixed volume")+end_index
+    mixed_vol = parse(Int64,sols[solpos1:solpos2])
+
     if stable
+        stablevol_str = "stable mixed volume"
+        lenstablestr = length(stablevol_str)
+        volstart = findall(stablevol_str,sols)
+        volend = volstart[1][1]-1
         vollast = findall("TIMING INFORMATION for Volume",sols)
         end_val = vollast[1][1]-length("TIMING INFORMATION for Volume")+2
         vollast = vollast[1][1]
-        end_index = findall("\n",sols[volend+4+length("stable mixed volume"):vollast-1])
+        end_index = findall("\n",sols[volend+4+lenstablestr:vollast-1])
         end_index = end_index[1][1]
-        mixed_vol = parse(Int64,sols[volend+4+length("stable mixed volume"):volend+4+length("stable mixed volume")+end_index])
-    else
-        vollast = findall("TIMING INFORMATION for Volume",sols)
-        end_val = vollast[1][1]-length("TIMING INFORMATION for Volume")+2
-        vollast = vollast[1][1]
-        end_index = findall("\n",sols[volend+4+length("common mixed volume"):vollast-1])
-        end_index = end_index[1][1]
-        mixed_vol = parse(Int64,sols[volend+4+length("common mixed volume"):volend+4+length("stable mixed volume")+end_index])
+        solpos1 = volend+4+lenstablestr
+        solpos2 = volend+2+lenstablestr+end_index
+        stable_vol = parse(Int64,sols[solpos1:solpos2])
     end
     
     close(solf_id)
@@ -89,5 +88,24 @@ function mixed_volume(pols::Array{String,1};
         solutions = extract_sols(sols)
     end
 
-    return mixed_vol
+    if !debug
+        if verbose
+            println("Removing $infile ...")
+        end
+        rm(infile)
+        if verbose
+            println("Removing $outfile ...")
+        end
+        rm(outfile)
+        if verbose
+            println("Removing $session ...")
+        end
+        rm(session)
+        if verbose
+            println("Removing $temp ...")
+        end
+        rm(temp)
+    end
+
+    return mixed_vol, stable_vol
 end
