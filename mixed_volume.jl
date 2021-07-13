@@ -19,7 +19,7 @@ function mixed_volume(pols::Array{String,1};
     
     infile = tmpdir * "/" * "mixedvolsysfile" * sr
     outfile = tmpdir * "/" *  "mixedvolout" * sr
-    solsfile = tmpdir * "/" * "mixedsols" * sr
+    solfile = tmpdir * "/" * "mixedsols" * sr
     startfile = tmpdir * "/" * "mixedstart" * sr
     temp = tmpdir * "/" * "mixedvoltemp" * sr
     session = tmpdir * "/" * "session" * sr
@@ -83,8 +83,23 @@ function mixed_volume(pols::Array{String,1};
         stable_vol = parse(Int64,sols[solpos1:solpos2])
     end
     
-    close(solf_id)
     if startsys
+        if verbose
+             println("Reading the start system from $startfile ...")
+        end
+        dim, startpols = read_system(startfile, verbose)
+        if verbose
+             println("Extracting solutions from $solfile ...")
+        end
+        cmd_z = `$phcbin -z $startfile $solfile`
+        run(cmd_z)
+        solf_id = open(solfile, "r")
+        sols = String(read(solf_id))
+        close(solf_id)
+        if verbose
+            println("The solutions :")
+            print(sols)
+        end
         solutions = extract_sols(sols)
     end
 
@@ -105,7 +120,29 @@ function mixed_volume(pols::Array{String,1};
             println("Removing $temp ...")
         end
         rm(temp)
+        if startsys
+            if verbose
+                println("Removing $startfile ...")
+            end
+            rm(startfile)
+            if verbose
+                println("Removing $solfile ...")
+            end
+            rm(solfile)
+        end
     end
 
-    return mixed_vol, stable_vol
+    if !startsys
+        if stable
+            return mixed_vol, stable_vol
+        else
+            return mixed_vol
+        end
+    else
+        if stable
+            return mixed_vol, stable_vol, startpols, solutions
+        else
+            return mixed_vol, startpols, solutions
+        end
+    end
 end
