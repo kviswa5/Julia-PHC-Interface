@@ -17,9 +17,10 @@ function testkatsura6()
     println("Computing the mixed volume of ", p, " ...")
 
     # mv, smv = juliaPHC.mixed_volume(p,stable=true,startsys=true,debug=true)
-    mv, smv, q, qsols = juliaPHC.mixed_volume(p,stable=true,startsys=true)
+    mv, smv, q, qsols, qsols0 = juliaPHC.mixed_volume(p,stable=true,startsys=true)
     println("The mixed volume : ", mv)
     println("The stable mixed volume : ", smv)
     println("The start system ", q)
     println("The number of start solutions : ", length(qsols))
+    println("The number of solutions with zero coordinates : ", length(qsols0))
 end

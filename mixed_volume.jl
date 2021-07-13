@@ -2,15 +2,53 @@ using Dates
 using Random
 
 """
-If stable = true, return both stable/common
+    mixed_volume(pols::Array{String,1};
+                 phcbin::String="phc",
+                 tmpdir::String="/tmp",
+                 startsys::Bool=false,
+                 stable::Bool=false,
+                 debug::Bool=false,
+                 verbose::Bool=false)
+
+Takes on input a list of string representations of polynomial
+and returns the mixed volume as its first argument on return.
+
+By default, only the mixed volume is returned.
+
+If the start system is requested, then polyhedral homotopies
+solve a random coefficient system.  This system may serve as
+a start system to solve the original polynomials on input.
+
+By default, solutions with zero coordinates are not counted.
+
+If the stable mixed volume is requested, then the second output
+argument is the upper bound on the number of affine solutions.
+If both the start system and stable mixed volume are requested,
+then the last argument on return are the solutions with zero coordinates.
+In case the mixed volume equals the stable mixed volume,
+then this last list may be empty.
+
+The other optional input arguments are
+
+    phcbin is the location of the binary phc
+
+    tmpdir is the folder for temporary files
+
+    startsys is the flag to run polyhedral homotopies
+
+    stable is the flag to request the stable mixed volume
+
+    if debug is true, then temporary files are not removed
+
+    verbose is the verbose flag
 """
 function mixed_volume(pols::Array{String,1};
                       phcbin::String="phc",
                       tmpdir::String="/tmp",
-                      startsys::Bool=true,
+                      startsys::Bool=false,
                       stable::Bool=false,
                       debug::Bool=false,
-                      verbose::Bool=true)
+                      verbose::Bool=false)
     
     moment = Dates.now()          # use time to generate random string
     seed = Dates.value(moment)
@@ -20,6 +58,7 @@ function mixed_volume(pols::Array{String,1};
     infile = tmpdir * "/" * "mixedvolsysfile" * sr
     outfile = tmpdir * "/" *  "mixedvolout" * sr
     solfile = tmpdir * "/" * "mixedsols" * sr
+    axsolfile = tmpdir * "/" * "mixedaxsols" * sr
     startfile = tmpdir * "/" * "mixedstart" * sr
     temp = tmpdir * "/" * "mixedvoltemp" * sr
     session = tmpdir * "/" * "session" * sr
@@ -101,6 +140,20 @@ function mixed_volume(pols::Array{String,1};
             print(sols)
         end
         solutions = extract_sols(sols)
+        if stable
+            if stable_vol > mixed_vol
+                cmd_z = `$phcbin -z $outfile $axsolfile`
+                run(cmd_z)
+                axsolf_id = open(axsolfile, "r")
+                axsols = String(read(axsolf_id))
+                close(axsolf_id)
+                if verbose
+                    println("The solutions with zero coordinates :")
+                    print(axsols)
+                end
+                axsolutions = extract_sols(axsols)
+            end
+        end
     end
 
     if !debug
@@ -140,7 +193,11 @@ function mixed_volume(pols::Array{String,1};
         end
     else
         if stable
-            return mixed_vol, stable_vol, startpols, solutions
+            if stable_vol > mixed_vol
+                return mixed_vol, stable_vol, startpols, solutions, axsolutions
+            else
+                return mixed_vol, stable_vol, startpols, solutions
+            end
         else
             return mixed_vol, startpols, solutions
         end
