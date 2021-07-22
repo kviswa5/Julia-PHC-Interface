@@ -1,6 +1,5 @@
-include("str2cmplx.jl")
 """
-    extract_sols(char_sols)
+extract_sols(char_sols)
 
 Take a string representation of the solution system
 Preconditions - (1) The solutions are separated by "[]", as formatted by phc
@@ -8,9 +7,16 @@ Preconditions - (1) The solutions are separated by "[]", as formatted by phc
 Arguments - (1) char_sols - string output representation of solution system
 
 Outputs a list of dictionaries that contain the solution systems
+"""
 
+"""
+    extract_sols(char_sols)
+Take a string representation of the solution system
+Preconditions - (1) The solutions are separated by "[]", as formatted by phc
+                (2) Within solutions, attributes are separated by ","
+Arguments - (1) char_sols - string output representation of solution system
+Outputs a list of dictionaries that contain the solution systems
 Example:
-
     charsols = \"\"\"
     [[time = 1.0 + 0*I,
       multiplicity = 1,
@@ -27,22 +33,19 @@ Example:
       x = 5.0E-1 - 8.66025403784439E-1*I,
       y = 5.0E-1 + 8.66025403784439E-1*I,
       err =  0.000E+00,  rco =  2.275E-01,  res =  0.000E+00]]\"\"\";
-
-    extract_sols(charsols)
-
 """
-function extract_sols(char_sols)
+
+function extract_sols(char_sols::String)::Array{Dict,1}
     sol_list = split(char_sols ,r"[[]")
-    # println(sol_list)
-    # println(length(sol_list))
-    deleteat!(sol_list, 1)
     deleteat!(sol_list, 1)
     dict_list = []
-    # println(length(sol_list))
     for i in 1:length(sol_list)
         dict = Dict()
         attr_list = split(sol_list[i],r"[,]")
-        deleteat!(attr_list, length(attr_list)) # deletes last element
+        # removes trailing "]" on last attribute.
+        if i == length(sol_list)
+            attr_list[end] = chop(attr_list[end])
+        end
         for j in 1:length(attr_list)
             indiv_list = split(attr_list[j],r"[=]")
             indiv_list[1] = replace(indiv_list[1],"\n"=>"")
@@ -57,10 +60,9 @@ function extract_sols(char_sols)
                 push!(dict, indiv_list[1] => cpx_result)
             end
         end
-        #if i > 1
         sort(collect(dict), by=x->x[1])
         push!(dict_list, dict)
-        #end
     end
+    deleteat!(dict_list,1)
     return dict_list
 end
