@@ -1,3 +1,4 @@
+include("str2cmplx.jl") # is helper function, not exported, must be included
 """
 extract_sols(char_sols)
 
@@ -56,6 +57,10 @@ function extract_sols(char_sols::String)::Array{Dict,1}
                 indiv_list[2] = lstrip(indiv_list[2])
                 indiv_list[2] = rstrip(indiv_list[2])
                 cpx_num = replace(indiv_list[2],"*I"=>"im")
+                # remove trailing square brackets
+                cpx_num = replace(cpx_num,"]"=>"")
+                # remove trailing semicolon
+                cpx_num = replace(cpx_num,";"=>"")
                 cpx_result = str2cmplx(cpx_num)
                 push!(dict, indiv_list[1] => cpx_result)
             end
