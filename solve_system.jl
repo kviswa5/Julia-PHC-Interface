@@ -8,6 +8,7 @@ using Random
                  startsys::Bool=false,
                  nthreads=0,
                  seed::Int=0,
+                 precision::Int=0,
                  debug::Bool=false,
                  verbose::Bool=true)
 
@@ -31,9 +32,14 @@ The other optional input arguments are
     nthreads=Inf applies all available threads
 
     seed is the value of the seed for the random number generators,
-    seed=0 generates a seed based on the current time
+    seed=0 generates a seed based on the current time, by default
 
-    if debug is true, then temporary files are not removed
+    precision allows to request double double or quad double arithmetic,
+    respectively by precision=2 or precision=4,
+    precision=0 computes by default in hardware double precision
+
+    if debug is true, then temporary files are not removed,
+    by default all temporary files are removed
 
     verbose is the verbose flag
 """
@@ -43,6 +49,7 @@ function solve_system(pols::Array{String,1};
                       startsys::Bool=false,
                       nthreads=0,
                       seed::Int=0,
+                      precision::Int=0,
                       debug::Bool=false,
                       verbose::Bool=true)
     moment = Dates.now()          # use time to generate random string
@@ -64,27 +71,57 @@ function solve_system(pols::Array{String,1};
     if seed != 0
         argseed = Int(seed)
     end
-
-    println("The seed : $argseed")
+    if precision != 0
+        argprc = Int(precision)
+        if !(argprc in [0, 2, 4])
+            println("Provide 0, 2, or 4 as precision value.")
+            println("Will default to double precision ...")
+            argprc = 0
+        end
+    end
 
     if nthreads == 0
         if seed == 0
-            cmd_b = `$phcbin -b $infile $outfile`
+            if precision == 0
+                cmd_b = `$phcbin -b $infile $outfile`
+            else
+                cmd_b = `$phcbin -b$argprc $infile $outfile`
+            end
         else
-            cmd_b = `$phcbin -b -0$argseed $infile $outfile`
+            if precision == 0
+                cmd_b = `$phcbin -b -0$argseed $infile $outfile`
+            else
+                cmd_b = `$phcbin -b$argprc -0$argseed $infile $outfile`
+            end
         end
     elseif nthreads == Inf
         if seed == 0
-            cmd_b = `$phcbin -b -t $infile $outfile`
+            if precision == 0
+                cmd_b = `$phcbin -b -t $infile $outfile`
+            else
+                cmd_b = `$phcbin -b$argprc -t $infile $outfile`
+            end
         else
-            cmd_b = `$phcbin -b -t -0$argseed $infile $outfile`
+            if precision == 0
+                cmd_b = `$phcbin -b -t -0$argseed $infile $outfile`
+            else
+                cmd_b = `$phcbin -b$argprc -t -0$argseed $infile $outfile`
+            end
         end
     else
         argnt = Int(nthreads) 
         if seed == 0
-            cmd_b = `$phcbin -b -t$argnt -0$argseed $infile $outfile`
+            if precision == 0
+                cmd_b = `$phcbin -b -t$argnt -0$argseed $infile $outfile`
+            else
+                cmd_b = `$phcbin -b$argprc -t$argnt -0$argseed $infile $outfile`
+            end
         else
-            cmd_b = `$phcbin -b -t$argnt -0$argseed $infile $outfile`
+            if precision == 0
+                cmd_b = `$phcbin -b -t$argnt -0$argseed $infile $outfile`
+            else
+                cmd_b = `$phcbin -b$argprc -t$argnt -0$argseed $infile $outfile`
+            end
         end
     end
     if verbose
