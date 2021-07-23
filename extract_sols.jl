@@ -1,73 +1,58 @@
-include("str2cmplx.jl") # is helper function, not exported, must be included
 """
-extract_sols(char_sols)
+    extract_sols(char_sols::String;
+                 precision=0, verbose=true)::Array{Dict,1}
 
-Take a string representation of the solution system
-Preconditions - (1) The solutions are separated by "[]", as formatted by phc
-                (2) Within solutions, attributes are separated by ","
-Arguments - (1) char_sols - string output representation of solution system
+Extracts the string representations of solutions into a dictionaries.
 
-Outputs a list of dictionaries that contain the solution systems
-"""
+The input string is a list of lists, with brackets as separators.
 
-"""
-    extract_sols(char_sols)
-Take a string representation of the solution system
-Preconditions - (1) The solutions are separated by "[]", as formatted by phc
-                (2) Within solutions, attributes are separated by ","
-Arguments - (1) char_sols - string output representation of solution system
-Outputs a list of dictionaries that contain the solution systems
-Example:
+Each solution is represented as a list of equations.
+
+    Example:
+
     charsols = \"\"\"
     [[time = 1.0 + 0*I,
       multiplicity = 1,
-      x = 1.0 + 3.29443685725954E-83*I,
-      y = -2.69520334646112E-17 - 3.29443685725954E-83*I,
-      err =  2.961E-16,  rco =  7.346E-02,  res =  2.471E-83],
+      x = -3.23606797749979 + 0*I,
+      y = 0 - 1.27201964951407*I,
+      err =  1.174E-15,  rco =  1.079E-01,  res =  0.000E+00],
      [time = 1.0 + 0*I,
       multiplicity = 1,
-      x = 5.0E-1 + 8.66025403784439E-1*I,
-      y = 5.0E-1 - 8.66025403784439E-1*I,
-      err =  0.000E+00,  rco =  2.275E-01,  res =  0.000E+00],
+      x = -3.23606797749979 + 0*I,
+      y = 0 + 1.27201964951407*I,
+      err =  1.174E-15,  rco =  1.079E-01,  res =  0.000E+00],
      [time = 1.0 + 0*I,
       multiplicity = 1,
-      x = 5.0E-1 - 8.66025403784439E-1*I,
-      y = 5.0E-1 + 8.66025403784439E-1*I,
-      err =  0.000E+00,  rco =  2.275E-01,  res =  0.000E+00]]\"\"\";
-"""
+      x = 1.23606797749979 + 0*I,
+      y = -7.86151377757423E-1 - 9.95682444457783E-60*I,
+      err =  3.476E-16,  rco =  1.998E-01,  res =  4.441E-16],
+     [time = 1.0 + 0*I,
+      multiplicity = 1,
+      x = 1.23606797749979 + 0*I,
+      y = 7.86151377757423E-1 + 9.95682444457783E-60*I,
+      err =  3.476E-16,  rco =  1.998E-01,  res =  4.441E-16]]\"\"\";
 
-function extract_sols(char_sols::String)::Array{Dict,1}
-    sol_list = split(char_sols ,r"[[]")
-    deleteat!(sol_list, 1)
+There are two optional input arguments:
+
+    precision allows to change the floating point type from the default
+    Float64 to double double or quad double precision,
+    respectively by precision=2 or precision=4
+
+    verbose is the verbose flag.
+"""
+function extract_sols(char_sols::String;
+                      precision=0, verbose=true)::Array{Dict,1}
+    sol_list = split(char_sols, r"[[]", keepempty=false)
     dict_list = []
     for i in 1:length(sol_list)
-        dict = Dict()
-        attr_list = split(sol_list[i],r"[,]")
-        # removes trailing "]" on last attribute.
-        if i == length(sol_list)
-            attr_list[end] = chop(attr_list[end])
+        if verbose
+            println("extracting solution ", i, " ...")
+            println(sol_list[i])
         end
-        for j in 1:length(attr_list)
-            indiv_list = split(attr_list[j],r"[=]")
-            indiv_list[1] = replace(indiv_list[1],"\n"=>"")
-            indiv_list[1] = lstrip(indiv_list[1])
-            indiv_list[1] = rstrip(indiv_list[1])
-            if (length(indiv_list) > 1)
-                indiv_list[2] = replace(indiv_list[2],"\n"=>"")
-                indiv_list[2] = lstrip(indiv_list[2])
-                indiv_list[2] = rstrip(indiv_list[2])
-                cpx_num = replace(indiv_list[2],"*I"=>"im")
-                # remove trailing square brackets
-                cpx_num = replace(cpx_num,"]"=>"")
-                # remove trailing semicolon
-                cpx_num = replace(cpx_num,";"=>"")
-                cpx_result = str2cmplx(cpx_num)
-                push!(dict, indiv_list[1] => cpx_result)
-            end
-        end
+        dict = extract_solution(String(sol_list[i]),
+                                precision=precision, verbose=verbose)
         sort(collect(dict), by=x->x[1])
         push!(dict_list, dict)
     end
-    deleteat!(dict_list,1)
     return dict_list
 end
