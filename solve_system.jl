@@ -7,6 +7,7 @@ using Random
                  tmpdir::String="/tmp",
                  startsys::Bool=false,
                  nthreads=0,
+                 seed::Int=0,
                  debug::Bool=false,
                  verbose::Bool=true)
 
@@ -29,6 +30,9 @@ The other optional input arguments are
     nthreads is the number of threads (by default no multithreading if zero),
     nthreads=Inf applies all available threads
 
+    seed is the value of the seed for the random number generators,
+    seed=0 generates a seed based on the current time
+
     if debug is true, then temporary files are not removed
 
     verbose is the verbose flag
@@ -38,11 +42,12 @@ function solve_system(pols::Array{String,1};
                       tmpdir::String="/tmp",
                       startsys::Bool=false,
                       nthreads=0,
+                      seed::Int=0,
                       debug::Bool=false,
                       verbose::Bool=true)
     moment = Dates.now()          # use time to generate random string
-    seed = Dates.value(moment)
-    rng = MersenneTwister(seed)
+    fileseed = Dates.value(moment)
+    rng = MersenneTwister(fileseed)
     sr = string(abs(round(rand(rng, Int64)))) 
 
     infile = tmpdir * "/in" * sr
@@ -55,13 +60,32 @@ function solve_system(pols::Array{String,1};
     if verbose
          println("Writing output to $outfile ...")
     end
+
+    if seed != 0
+        argseed = Int(seed)
+    end
+
+    println("The seed : $argseed")
+
     if nthreads == 0
-        cmd_b = `$phcbin -b $infile $outfile`
+        if seed == 0
+            cmd_b = `$phcbin -b $infile $outfile`
+        else
+            cmd_b = `$phcbin -b -0$argseed $infile $outfile`
+        end
     elseif nthreads == Inf
-        cmd_b = `$phcbin -b -t $infile $outfile`
+        if seed == 0
+            cmd_b = `$phcbin -b -t $infile $outfile`
+        else
+            cmd_b = `$phcbin -b -t -0$argseed $infile $outfile`
+        end
     else
         argnt = Int(nthreads) 
-        cmd_b = `$phcbin -b -t$argnt $infile $outfile`
+        if seed == 0
+            cmd_b = `$phcbin -b -t$argnt -0$argseed $infile $outfile`
+        else
+            cmd_b = `$phcbin -b -t$argnt -0$argseed $infile $outfile`
+        end
     end
     if verbose
         println("Running ", cmd_b)
