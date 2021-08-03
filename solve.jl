@@ -1,3 +1,5 @@
+include("extract_decomposition.jl")
+
 using Dates
 using Random
 
@@ -153,6 +155,6 @@ function solve(pols::Array{String,1};
 
         println("See $outfile for the results.")
 
-        return []
+        return extract_decomposition(outfile,topdim,verbose=true)
     end
 end
