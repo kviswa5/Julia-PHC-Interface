@@ -37,25 +37,35 @@ function  extract_decomposition(outfile::String,
     output = String(read(outf_id))
     close(outf_id)
 
-    dimstr = "Writing the factors of dimension"
-    dimensions = findall(dimstr, output)
+    superstr = "_sw"
+    superidx = findall(superstr, output)
+    supersets = []
 
-    if verbose
-        # println("the dimension information :")
-        # println(length(dimensions))
-        if length(dimensions) == 0
-            println("-> found no positive dimensional solutions")
-        else
-            for i=1:length(dimensions)
-                # println(dimensions[i])
-                rng = dimensions[i]
-                # println(output[rng])
-                endrng = length(dimstr) + rng[2] - 1
-                strdim = output[endrng:endrng+2]
-                # println(strdim)
-                dim = parse(Int, strdim)
+    if length(superidx) == 0
+        if verbose
+            println("-> found no super witness sets")
+        end
+    else
+        for i=1:length(superidx)
+            rng = superidx[i]
+            endrng = length(superstr) + rng[2] - 1
+            strsuper = output[rng[1]:endrng+2]
+            dimstrsuper = output[endrng:endrng+2]
+            endstrsuper = findnext("\n", dimstrsuper, 1)
+            dim = parse(Int, dimstrsuper[1:endstrsuper[1]-1])
+            filesuperset = outfile * "_sw" * string(dim)
+            if verbose
                 println("-> found solutions of dimension ", dim)
+                println(filesuperset, " is the super witness set file")
             end
+            push!(supersets, filesuperset)
+        end
+    end
+
+    if(verbose)
+        println("The super set files :")
+        for i=1:length(supersets)
+            println(supersets[i])
         end
     end
 
@@ -74,17 +84,8 @@ function  extract_decomposition(outfile::String,
         fileseed = Dates.value(moment)
         rng = MersenneTwister(fileseed)
         sr = string(abs(round(rand(rng, Int64)))) 
-        isosols1file = tmpdir * "/" * "isosols1file" * sr
         isosols2file = tmpdir * "/" * "isosols2file" * sr
-        isosols1_id = open(isosols1file, "w")
-        println(isosols1_id, "THE SOLUTIONS :")
-        rng = isolated[1]
-        # println(rng)
-        # println(output[rng])
-        endrng = length(isostr) + rng[2]
-        strisosols1 = output[endrng:length(output)]
-        println(isosols1_id, strisosols1)
-        close(isosols1_id)
+        isosols1file = supersets[1]
         if verbose
              println("Extracting solutions from $isosols1file ...")
         end
