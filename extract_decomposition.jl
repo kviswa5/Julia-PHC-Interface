@@ -1,6 +1,6 @@
 using Dates
 using Random
-
+include("extract_factors.jl")
 """
     extract_decomposition(outfile::String,
                           topdim::Int;
@@ -23,12 +23,12 @@ The other optional input arguments are
 
     verbose is the verbose flag
 """
-function  extract_decomposition(outfile::String,
-                                topdim::Int;
-                                phcbin::String="phc",
-                                tmpdir::String="/tmp",
-                                debug::Bool=false,
-                                verbose::Bool=true)
+function extract_decomposition(outfile::String,
+                               topdim::Int;
+                               phcbin::String="phc",
+                               tmpdir::String="/tmp",
+                               debug::Bool=false,
+                               verbose::Bool=true)
     if verbose
         println("Opening $outfile ...")
     end
@@ -40,6 +40,7 @@ function  extract_decomposition(outfile::String,
     superstr = "_sw"
     superidx = findall(superstr, output)
     supersets = []
+    dimensions = []
 
     if length(superidx) == 0
         if verbose
@@ -59,15 +60,20 @@ function  extract_decomposition(outfile::String,
                 println(filesuperset, " is the super witness set file")
             end
             push!(supersets, filesuperset)
+            push!(dimensions, dim)
         end
     end
 
     if(verbose)
+        println("The dimensions : ", dimensions)
         println("The super set files :")
         for i=1:length(supersets)
             println(supersets[i])
         end
     end
+
+    factors = extract_factors(outfile,Array{Int, 1}(dimensions),
+       phcbin=phcbin,tmpdir=tmpdir,debug=debug,verbose=verbose)
 
     isostr = "THE ISOLATED SOLUTIONS :"
     isolated = findall(isostr, output)
@@ -90,10 +96,10 @@ function  extract_decomposition(outfile::String,
              println("Extracting solutions from $isosols1file ...")
         end
         cmd_z = `$phcbin -z $isosols1file $isosols2file`
-        run(cmd_z)
         if verbose
             println("Running ", cmd_z)
         end
+        run(cmd_z)
         isosols2_id = open(isosols2file, "r")
         isosols = String(read(isosols2_id))
         close(isosols2_id)
@@ -102,7 +108,13 @@ function  extract_decomposition(outfile::String,
             print(isosols)
         end
         isosolutions = extract_sols(isosols, verbose=false)
+        # push!(factors, isosolutions)
+        for resfac in factors
+            if resfac["dimension"] == 0
+                push!(resfac["factors"], isosolutions)
+            end
+        end
     end
 
-    return isosolutions
+    return factors
 end
