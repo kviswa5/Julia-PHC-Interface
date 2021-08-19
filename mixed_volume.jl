@@ -139,7 +139,7 @@ function mixed_volume(pols::Array{String,1};
             println("The solutions :")
             print(sols)
         end
-        solutions = extract_sols(sols)
+        solutions = extract_solutions(sols)
         if stable
             if stable_vol > mixed_vol
                 cmd_z = `$phcbin -z $outfile $axsolfile`
@@ -151,7 +151,7 @@ function mixed_volume(pols::Array{String,1};
                     println("The solutions with zero coordinates :")
                     print(axsols)
                 end
-                axsolutions = extract_sols(axsols)
+                axsolutions = extract_solutions(axsols)
             end
         end
     end

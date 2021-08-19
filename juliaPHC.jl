@@ -11,7 +11,7 @@ See the documentation of version_string for optional arguments.
 module juliaPHC
 
 export version_string, read_system, write_system, solve_system
-export extract_sols, extract_solution, mixed_volume, solve
+export extract_solutions, extract_solution, mixed_volume, solve
 export test, testcyclic7, testcyclic8, testkatsura6, testmultistep
 
 include("version_string.jl")
@@ -20,7 +20,7 @@ include("write_system.jl")
 include("solve_system.jl")
 include("mixed_volume.jl")
 include("solve.jl")
-include("extract_sols.jl")
+include("extract_solutions.jl")
 include("extract_solution.jl")
 include("test.jl")
 include("testcyclic7.jl")

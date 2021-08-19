@@ -107,7 +107,7 @@ function extract_decomposition(outfile::String,
             println("The isolated solutions :")
             print(isosols)
         end
-        isosolutions = extract_sols(isosols, verbose=false)
+        isosolutions = extract_solutions(isosols, verbose=false)
         # push!(factors, isosolutions)
         for resfac in factors
             if resfac["dimension"] == 0

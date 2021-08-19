@@ -75,7 +75,7 @@ function extract_factor(factor::String;
         println("The generic points :")
         print(strgenpts)
     end
-    genpts = extract_sols(strgenpts, verbose=false)
+    genpts = extract_solutions(strgenpts, verbose=false)
 
     result = Dict([("polynomials", setpols), ("points", genpts)])
 

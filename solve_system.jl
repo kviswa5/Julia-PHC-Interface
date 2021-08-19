@@ -143,7 +143,7 @@ function solve_system(pols::Array{String,1};
         print(sols)
     end
     close(solf_id)
-    solutions = extract_sols(sols, precision=precision, verbose=verbose)
+    solutions = extract_solutions(sols, precision=precision, verbose=verbose)
 
     if !startsys
         if !debug
@@ -181,7 +181,7 @@ function solve_system(pols::Array{String,1};
             print(startsols)
         end
         close(startsolf_id)
-        startsolutions = extract_sols(startsols,
+        startsolutions = extract_solutions(startsols,
                                       precision=precision, verbose=verbose)
 
         if !debug

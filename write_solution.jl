@@ -1,16 +1,16 @@
 using Printf
 """
-Writes a solution in character format to a phc Pack format, with an associated filename.
+Writes a solution in character format to a PHCpack format,
+with an associated filename.
 Preconditions - 
                 
 Arguments - (1) filename is a file the writes to the current directory
 (2) solution is a string of solutions in phc format
 Outputs a solution file with the name in the current directory.
-Example:
 """
 function write_solution(filename::String,solution::String)
     f = open(filename, "w")
-    temp_sol = extract_sols(solution)
+    temp_sol = extract_solutions(solution)
     solution = deepcopy(temp_sol)
     # temp solution contains key values only associated with the variable names
     for i = 1:length(temp_sol)
